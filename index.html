@@ -143,6 +143,30 @@
     const esc=v=>String(v||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
     const collapse=v=>n(v).replace(/\n{4,}/g,"\n\n\n");
     const joinBlocks=blocks=>collapse(blocks.map(v=>n(v).trim()).filter(Boolean).join("\n\n")).trim();
+    function normalizeEmit(text){
+      const src=n(text).replace(/[ \t]+\n/g,"\n").replace(/\n{4,}/g,"\n\n\n").trim();
+      if(!src) return "";
+      const out=[];
+      const pushBlank=()=>{ if(out.length && out[out.length-1] !== "") out.push(""); };
+      src.split("\n").forEach(raw=>{
+        const line=raw.trimEnd();
+        const trimmed=line.trim();
+        if(!trimmed){
+          pushBlank();
+          return;
+        }
+        if(trimmed==="***" || /^(##|###|####)\s+/.test(trimmed)){
+          pushBlank();
+          out.push(trimmed);
+          out.push("");
+          return;
+        }
+        out.push(line);
+      });
+      while(out.length && out[0]==="") out.shift();
+      while(out.length && out[out.length-1]==="") out.pop();
+      return out.join("\n").replace(/\n{4,}/g,"\n\n\n");
+    }
     const titleFirst=v=>{const s=t(v);return s?s.charAt(0).toUpperCase()+s.slice(1):""};
     const tokens=v=>n(v).split(/[\n,]/).map(x=>x.trim()).filter(Boolean);
     const createObservationEnemyRow=()=>({shortName:"",enemyClass:"",enemyType:"",enemyArmor:"",weapons:[],note:""});
@@ -312,7 +336,7 @@ refs.frame.srcdoc=`<!doctype html><html><head><meta charset="UTF-8"><style>@impo
         const def=DEFS.find(d=>d.id===id), body=map[id]();
         if(state.sections[id]?.enabled || body) blocks.push(sectionWrap(def,body));
       });
-      state.output=joinBlocks(blocks)+"\n"; refs.output.textContent=state.output; renderPreview(state.output); refreshStatuses();
+      state.output=normalizeEmit(joinBlocks(blocks))+"\n"; refs.output.textContent=state.output; renderPreview(state.output); refreshStatuses();
     }
 
     function refreshStatuses(){
