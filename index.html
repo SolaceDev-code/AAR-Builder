@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AEGIS After Action Report Builder</title>
+  <style>
+    @import url("https://delphi.aresmush.com/game/styles/ares.css");
+    :root{--bg:#0f1318;--panel:#18202a;--panel2:#222d39;--panel3:#111820;--text:#f2f4f7;--muted:#b7c0cc;--accent:#b77d27;--accent2:#e4b66b;--border:#314152;--ok:#9fe8ad;--warn:#efc57b;--bad:#f3a2a2}
+    *{box-sizing:border-box} body{margin:0;padding:clamp(12px,2vw,24px);font-family:Arial,Helvetica,sans-serif;color:var(--text);background:#0f1318}
+    .wrap{max-width:1420px;margin:0 auto}.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:clamp(12px,2vw,18px);text-align:left}.topbar > div{max-width:min(100%,860px)}.site-title,.site-subtitle{display:block;max-width:100%;text-align:left}.site-title{white-space:nowrap;font-size:clamp(1.25rem,2.6vw,2.4rem);line-height:1.1}.site-subtitle{white-space:normal;font-size:clamp(1rem,1.8vw,1.2rem);line-height:1.45}.tag{display:inline-block;padding:6px 12px;border-radius:5px;background:var(--accent2);color:#131313;font-size:.82rem;font-weight:700;margin-bottom:10px}
+    .top-strip{display:grid;gap:0;margin:clamp(10px,1.6vw,14px) 0 clamp(14px,2vw,18px)}
+    .meta-strip{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;padding:6px 0;border-top:1px solid rgba(49,65,82,.35);min-width:0}
+    .meta-pill{display:inline-flex;align-items:baseline;gap:6px;min-width:0;white-space:nowrap}
+    .meta-pill span{display:inline;color:rgba(183,125,39,.95);font-family:"Saira Condensed",sans-serif;font-size:clamp(.9rem,1.2vw,1.2rem);line-height:1.5;letter-spacing:.08em;text-transform:uppercase;font-weight:400;margin:0}
+    .meta-pill strong{display:inline;font-family:"Saira Condensed",sans-serif;font-size:clamp(.9rem,1.2vw,1.2rem);line-height:1.5;letter-spacing:.08em;text-transform:uppercase;font-weight:400;color:rgba(183,125,39,.95)}
+    .meta-status{color:rgba(183,125,39,.95);font-family:"Saira Condensed",sans-serif;font-size:clamp(.9rem,1.2vw,1.2rem);line-height:1.5;letter-spacing:.08em;text-transform:uppercase;font-weight:400}
+    .meta-status.bad{color:var(--bad)}
+    .action-strip{display:flex;flex-wrap:wrap;align-items:center;gap:4px 16px;padding:3px 0 6px;border-top:1px solid rgba(49,65,82,.55);border-bottom:1px solid rgba(49,65,82,.55)}
+    .action-strip .status{margin:0 0 0 auto}
+    .action-link{display:inline;color:#3cc7d5;text-decoration:none;font-weight:400;font-size:clamp(.9rem,1.2vw,1.2rem);line-height:1.5;letter-spacing:.08em;text-transform:uppercase;font-family:"Saira Condensed",sans-serif}
+    .action-link:hover,.action-link:focus-visible{color:#ffffff;text-decoration:none}
+    .action-link-gold{color:#b77d28}
+    .footer-area{margin-top:clamp(14px,2vw,20px)}
+    .footer-area .meta-strip{border-top:1px solid rgba(49,65,82,.35)}
+    .footer-strip{padding-top:10px;border-top:1px solid rgba(49,65,82,.45);color:rgba(183,125,39,.95);font-family:"Saira Condensed",sans-serif;font-size:clamp(.85rem,1.1vw,1rem);line-height:1.5;letter-spacing:.08em;text-transform:uppercase}
+    .shell{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(320px,1fr);gap:clamp(16px,2vw,20px);align-items:start}.stack{display:grid;gap:clamp(14px,2vw,18px)}.card,.section-card{background:rgba(24,32,42,.94);border:1px solid rgba(49,65,82,.75);border-radius:5px;padding:0;box-shadow:0 6px 18px rgba(0,0,0,.14)}.section-card{padding:0;overflow:hidden}.card h2{margin:0 0 12px;font-size:1.1rem}
+    .actions,.tab-buttons{display:grid;grid-template-columns:repeat(5,1fr);gap:25px}.tab-buttons{grid-template-columns:repeat(3,minmax(0,1fr));align-items:end;justify-items:stretch}.card .tab-buttons,.mobile-tabs .tab-buttons{justify-items:stretch;align-items:end}.card .tab-buttons{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:8px 12px 2px}.mobile-tabs .tab-buttons{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:6px 0 2px}.card .tab-buttons .tab-btn,.mobile-tabs .tab-buttons .tab-btn{margin:0}button,select,input,textarea{width:100%;font:inherit;border-radius:5px}button{cursor:pointer;border:1px solid transparent;background:transparent;color:#b77d28;padding:9px 12px;font-weight:400;font-family:"Rationale",sans-serif;letter-spacing:.04em;text-transform:uppercase}button:hover{filter:none;background:transparent;color:#3cc7d5}button:focus-visible,.action-link:focus-visible{outline:2px solid #ffffff;outline-offset:2px}button.primary,.tab-btn.active,.pill-toggle.active{background:transparent;border-color:transparent;color:#3cc7d5;box-shadow:none}.tab-btn{width:100%;min-height:44px;padding:4px 10px 2px;font-size:clamp(1rem,2vw,1.35rem);line-height:1.1;text-align:left}.tab-btn:hover,.tab-btn:focus-visible{color:#ffffff}.tab-btn.active{text-decoration:underline;text-decoration-color:#3cc7d5;text-decoration-thickness:2px;text-underline-offset:6px}
+    button.icon,button.pill-toggle{width:auto;padding:6px 9px;font-size:.88rem;line-height:1.15}input,select,textarea{background:var(--panel2);color:var(--text);border:1px solid rgba(49,65,82,.9);padding:11px 12px}textarea{resize:vertical;line-height:1.45}label{display:block;font-weight:500;color:rgba(183,192,204,.9);font-size:.82rem;line-height:1.1;letter-spacing:.03em;text-transform:uppercase;margin:10px 0 0}label+input,label+select,label+textarea,label+.weapon-grid,label+.toggle-group{margin-top:1px}.field-hint{display:block;color:rgba(183,192,204,.72);font-size:.76rem;line-height:1.35;margin:0 0 8px}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.small{color:rgba(183,192,204,.88);font-size:.88rem;line-height:1.4;margin-top:6px}.status,.lookup-status{min-height:1.2em;margin-top:10px;font-size:.95rem}.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}.status-ok{color:var(--ok)}.status-warn{color:var(--warn)}.status-bad{color:var(--bad)}
+    .tab-panel,.mobile-panel{display:none}.tab-panel.active,.mobile-panel.active{display:block}#outputPanel.desktop-only{display:grid}.card .tab-panel{padding:6px 12px 12px}.output-box,.preview-shell{min-height:clamp(360px,65vh,780px);background:#0d1117;color:#f3f5f7;border:1px solid rgba(49,65,82,.75);border-radius:5px;padding:14px}.output-box{white-space:pre-wrap;overflow-wrap:anywhere;font-family:Consolas,Monaco,monospace;line-height:1.5}.preview-shell{overflow:hidden}.preview-shell iframe{display:block;width:100%;min-height:clamp(330px,62vh,750px);border:none;border-radius:0;background:#fff}
+    .section-head{display:grid;grid-template-columns:auto auto auto auto minmax(0,1fr) auto auto;gap:6px;align-items:center;padding:8px 10px;border-bottom:1px solid rgba(49,65,82,.7);background:rgba(255,255,255,.015);font-family:"Saira Condensed",sans-serif;letter-spacing:0;text-transform:uppercase}.section-head.pinned{background:rgba(255,255,255,.015)}.section-label{font-weight:500;letter-spacing:.04em}.section-index{color:var(--muted);text-align:center;width:24px;font-size:.88rem;letter-spacing:inherit;opacity:.8}.toggle-group{display:flex;gap:6px;justify-content:flex-end;align-items:center;flex-wrap:wrap}.section-body{padding:0 clamp(12px,2vw,14px) clamp(12px,2vw,14px)}.section-body.collapsed{display:none}
+    .collapse-toggle{color:#3cc7d5}
+    .collapse-toggle.collapsed{color:#b77d28}
+    .collapse-toggle:hover,.collapse-toggle:focus-visible{color:#ffffff}
+    .icon.disabled,.pill-toggle.disabled{opacity:.35;cursor:default;pointer-events:none;background:transparent;color:var(--muted)}
+    .mode-toggle,.pill-toggle{min-width:106px;text-align:center;border-color:transparent;background:transparent;color:#b77d28;font-family:"Rationale",sans-serif;font-size:clamp(1rem,2vw,1.35rem);line-height:1.1;letter-spacing:.04em;padding:4px 10px 2px}
+    .mode-toggle.structured,.pill-toggle.active{color:#3cc7d5}
+    .mode-toggle.freeform{color:#b77d28}
+    .pill-toggle:hover,.mode-toggle:hover,.pill-toggle:focus-visible,.mode-toggle:focus-visible{color:#ffffff}
+    .enemy-row{display:grid;gap:8px;padding:10px 12px;border:1px solid rgba(49,65,82,.7);border-radius:5px;background:rgba(255,255,255,.02);margin:10px 0}
+    .enemy-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;align-items:start}
+    .enemy-grid input,.enemy-grid select{height:45px}
+    .weapon-grid{display:flex;flex-wrap:wrap;column-gap:12px;row-gap:0;margin-top:0}
+    .weapon-option{display:inline-flex;align-items:center;gap:5px;color:rgba(235,235,235,.86);font-size:.84rem;line-height:1.2;white-space:nowrap;margin:0;text-transform:none;letter-spacing:0;font-weight:400}
+    .weapon-option input{width:auto;margin:0}
+    .enemy-actions{display:flex;justify-content:flex-end;gap:8px}
+    .enemy-row label + .weapon-grid{margin-top:-5px}
+    .enemy-row label + textarea{margin-top:1px}
+    details.helper{background:#10171e;border:1px solid var(--border);border-radius:5px;padding:10px 12px;color:var(--muted);font-size:.9rem;line-height:1.45;margin-top:12px}details.helper summary{cursor:pointer;color:var(--text);font-weight:700}details.helper[open] summary{color:#3cc7d5}.help-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 10px}.help-tab{width:auto;padding:5px 9px;border:1px solid rgba(183,125,39,.28);background:rgba(255,255,255,.03);color:var(--muted);border-radius:5px;font-size:.84rem;line-height:1.2}.help-tab.active{background:rgba(60,199,213,.14);border-color:rgba(60,199,213,.38);color:#3cc7d5}.help-panel{display:none}.help-panel.active{display:block}.help-grid{display:grid;grid-template-columns:96px minmax(0,1fr);gap:10px 14px;align-items:start}.help-grid strong{color:var(--text)}.help-block{display:grid;gap:6px}.help-chip-row{display:flex;flex-wrap:wrap;gap:6px}.help-chip{display:inline-flex;align-items:center;padding:3px 7px;border-radius:5px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}.help-grid code{display:inline-block}.help-note{color:var(--muted)}.help-links{display:flex;flex-wrap:wrap;gap:14px}.mobile-tabs{display:none}
+    @media (max-width:1024px){
+      .shell{display:block}
+      .desktop-only{display:none}
+      #outputPanel.mobile-panel.active{display:grid}
+      .mobile-tabs{display:grid;gap:10px;margin-bottom:14px}
+      .meta-tail,.meta-status{width:100%}
+      .action-strip .status{width:100%;margin:0}
+      .row3{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .row3 > :last-child:nth-child(odd){grid-column:1 / -1}
+    }
+    @media (max-width:768px){
+      .row,.row3,.actions{grid-template-columns:1fr}
+      .enemy-grid,.weapon-grid{grid-template-columns:1fr 1fr}
+      .section-head{grid-template-columns:auto auto auto auto minmax(0,1fr) auto auto;gap:4px}
+      .section-head .toggle-group{grid-column:auto;justify-content:flex-end;flex-wrap:nowrap}
+      .section-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1}
+      .section-index{width:auto}
+    }
+    @media (max-width:560px){
+      .top-strip{margin:12px 0 16px}
+      .site-title{font-size:clamp(1.45rem,7vw,1.85rem)}
+      .site-subtitle{font-size:clamp(.95rem,4.2vw,1.1rem);line-height:1.5}
+      .meta-pill{gap:4px}
+      .meta-pill span,.meta-pill strong,.meta-status,.action-link,.footer-strip{font-size:clamp(.78rem,3.2vw,.92rem)}
+      .site-title{font-size:1rem;letter-spacing:0}
+      .mobile-tabs .tab-buttons{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:6px 0 2px}
+      .mobile-tabs .tab-btn{padding:6px 8px 4px;font-size:clamp(.92rem,3.8vw,1.05rem)}
+      .section-head{padding:8px 6px;grid-template-columns:auto auto auto auto minmax(0,1fr) auto auto}
+      .section-head .toggle-group{gap:2px}
+      .section-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1}
+      .enemy-grid,.weapon-grid{grid-template-columns:1fr}
+      .enemy-row .weapon-grid + .field-hint{display:none}
+      .enemy-row label + .weapon-grid{margin-top:0}
+      button.icon,button.pill-toggle{padding:6px 8px}
+      .help-grid{grid-template-columns:1fr}
+      .help-grid strong{margin-top:4px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <div class="site-title">AFTER ACTION REPORT BUILDER</div>
+        <div class="site-subtitle">Build forum-ready After Action Reports with reorderable sections, JSON-powered lookup, and Ares-ready output formatting.</div>
+      </div>
+    </div>
+    <div class="top-strip">
+      <div class="action-strip">
+        <a id="resetBtn" class="action-link" href="#">Reset</a><a id="sampleBtn" class="action-link" href="#">Sample</a><a id="copyBtn" class="action-link" href="#">Copy</a><a id="downloadBtn" class="action-link" href="#">Download</a><a id="allOnBtn" class="action-link action-link-gold" href="#">All On</a><a id="allOffBtn" class="action-link action-link-gold" href="#">All Off</a><a id="allStructuredBtn" class="action-link action-link-gold" href="#">All Structure</a><a id="allFreeformBtn" class="action-link action-link-gold" href="#">All Freeform</a><a id="expandBtn" class="action-link action-link-gold" href="#">Expand All</a><a id="collapseBtn" class="action-link action-link-gold" href="#">Collapse All</a>
+        <div id="globalStatus" class="status"></div>
+      </div>
+    </div>
+    <div class="mobile-tabs"><div class="tab-buttons"><button class="tab-btn active" data-mobile-tab="form">Form</button><button class="tab-btn" data-mobile-tab="output">Output</button><button class="tab-btn" data-mobile-tab="preview">Preview</button></div></div>
+    <div class="shell">
+      <div id="formPanel" class="stack mobile-panel active">
+        <div id="sectionMount" class="stack"></div>
+      </div>
+      <div id="outputPanel" class="stack desktop-only mobile-panel">
+        <div class="card">
+          <div class="tab-buttons"><button class="tab-btn active" data-tab="output">Output</button><button class="tab-btn" data-tab="preview">Preview</button></div>
+          <div id="outputTab" class="tab-panel active"><div id="outputBox" class="output-box"></div></div>
+          <div id="previewTab" class="tab-panel"><div class="preview-shell"><iframe id="previewFrame" title="Ares output preview"></iframe></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-area">
+      <div class="meta-strip">
+        <div class="meta-pill"><span>Archived:</span><strong id="metaWikiArchive">Loading...</strong></div>
+        <div class="meta-pill"><span>Built:</span><strong id="metaJsonBuild">Loading...</strong></div>
+        <div class="meta-pill"><span>Characters:</span><strong id="metaCharacters">-</strong></div>
+        <div class="meta-pill"><span>Mechs:</span><strong id="metaMechs">-</strong></div>
+        <div class="meta-pill"><span>Colossi:</span><strong id="metaColossi">-</strong></div>
+        <div id="datasetStatus" class="meta-status"></div>
+      </div>
+      <div class="footer-strip">Bugs, Suggestions, Questions See Solace</div>
+    </div>
+  </div>
+  <script>
+    const DATASET_PATH="./sample-output/aar-data.json";
+    const HEADLINES={after_action_report:"## AFTER ACTION REPORT",addendum:"## ADDENDUM",amendment:"## AMENDMENT"};
+    const OBJECTIVE_STATUS_VALUES=["Embarrassing Failure","Failure","Partial Success","Success","Amazing Success"];
+    const OBSERVATION_TYPES=["Humanoidcolossus","Quadruped","Avian","Draconic","Crustacean","Insect","Swarm","Hexapod","Centaur","Serpentine","Aquatic","Repair"];
+    const OBSERVATION_CLASSES=["Class One","Class Two","Class Three","Class Four"];
+    const OBSERVATION_ARMOR=["Agile","General","Ram","Tank"];
+    const OBSERVATION_WEAPONS=["Claw","Bite","Spines","Acid","Club","Mandibles","Talons","Suppression"];
+    const DEFS=[{id:"section_zero",label:"REPORT HEADER",type:"pinned"},{id:"combatants",label:"COMBATANTS",type:"mixed",emitHeader:"### COMBATANTS"},{id:"objectives",label:"OBJECTIVES",type:"mixed",emitHeader:"### OBJECTIVES (AS UNDERSTOOD IN THEATER)"},{id:"summary",label:"SUMMARY",type:"freeform-only",emitHeader:"### SUMMARY"},{id:"casualties",label:"CASUALTIES",type:"mixed",emitHeader:"### CASUALTIES"},{id:"observations",label:"OBSERVATIONS",type:"mixed",emitHeader:"### OBSERVATIONS"},{id:"recommendations",label:"RECOMMENDATIONS",type:"mixed",emitHeader:"### RECOMMENDATIONS"},{id:"commendations",label:"COMMENDATIONS",type:"mixed",emitHeader:"### COMMENDATIONS"},{id:"considerations",label:"ADDITIONAL CONSIDERATIONS",type:"mixed",emitHeader:"### ADDITIONAL CONSIDERATIONS"},{id:"final_assessment",label:"FINAL ASSESSMENT",type:"freeform-only",emitHeader:"### FINAL ASSESSMENT"}];
+    const state={dataset:null,loadError:"",sectionOrder:["combatants","objectives","summary","casualties","observations","recommendations","commendations","considerations","final_assessment"],sections:{},header:{},output:"",mobileTab:"form",desktopTab:"output"};
+    const refs={mount:document.getElementById("sectionMount"),output:document.getElementById("outputBox"),frame:document.getElementById("previewFrame"),status:document.getElementById("globalStatus")};
+    const datasetStatusNode=()=>document.getElementById("datasetStatus");
+
+    const n=v=>String(v||"").replace(/\r\n/g,"\n").replace(/\r/g,"\n");
+    const t=v=>String(v||"").trim();
+    const esc=v=>String(v||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    const collapse=v=>n(v).replace(/\n{4,}/g,"\n\n\n");
+    const joinBlocks=blocks=>collapse(blocks.map(v=>n(v).trim()).filter(Boolean).join("\n\n")).trim();
+    const titleFirst=v=>{const s=t(v);return s?s.charAt(0).toUpperCase()+s.slice(1):""};
+    const tokens=v=>n(v).split(/[\n,]/).map(x=>x.trim()).filter(Boolean);
+    const createObservationEnemyRow=()=>({shortName:"",enemyClass:"",enemyType:"",enemyArmor:"",weapons:[],note:""});
+
+    function initDefaults(){
+      state.header={report_headline:"after_action_report",character_lookup:"",display_name_mode:"Full",sender_role_mode:"Pilot",scene_title:"",scene_number:"",date:"",lookupStatus:"",collapsed:false};
+      state.sections={
+        combatants:{enabled:true,collapsed:false,mode:"structured",structuredInput:"",freeformInput:"",status:""},
+        objectives:{enabled:true,collapsed:false,mode:"structured",objectiveLines:"",objectiveStatus:"Success",objectiveNote:"",freeformInput:"",status:""},
+        summary:{enabled:true,collapsed:false,freeformInput:"",status:""},
+        casualties:{enabled:true,collapsed:false,mode:"structured",structuredInput:"",freeformInput:"",status:""},
+        observations:{enabled:true,collapsed:false,mode:"structured",enemyRows:[createObservationEnemyRow()],workedInput:"",didntWorkInput:"",freeformInput:"",status:""},
+        recommendations:{enabled:true,collapsed:false,mode:"structured",structuredInput:"",freeformInput:"",status:""},
+        commendations:{enabled:false,collapsed:true,mode:"structured",structuredInput:"",freeformInput:"",status:""},
+        considerations:{enabled:false,collapsed:true,mode:"structured",structuredInput:"",freeformInput:"",status:""},
+        final_assessment:{enabled:false,collapsed:true,freeformInput:"",status:""}
+      };
+      applyHeadlineDefaults();
+    }
+
+    function applyHeadlineDefaults(){
+      const isAAR=state.header.report_headline==="after_action_report";
+      state.sections.combatants.enabled=isAAR; state.sections.combatants.collapsed=!isAAR;
+      state.sections.summary.enabled=isAAR; state.sections.summary.collapsed=!isAAR;
+      state.sections.considerations.enabled=!isAAR; state.sections.considerations.collapsed=isAAR;
+    }
+
+    function setAllMixedModes(mode){
+      Object.entries(state.sections).forEach(([id,s])=>{
+        if(!("mode" in s)) return;
+        s.mode=mode;
+      });
+    }
+
+    function fillStructuredSample(){
+      state.header={
+        report_headline:"after_action_report",
+        character_lookup:"Willa",
+        display_name_mode:"Full",
+        sender_role_mode:"Pilot",
+        scene_title:"Operation Glass Horizon",
+        scene_number:"4201",
+        date:"2026-04-21",
+        lookupStatus:"",
+        collapsed:false
+      };
+      state.sections.combatants={...state.sections.combatants,enabled:true,collapsed:false,mode:"structured",structuredInput:"Willa\nJoker\nGrave Protocol",freeformInput:"",status:""};
+      state.sections.objectives={...state.sections.objectives,enabled:true,collapsed:false,mode:"structured",objectiveLines:"Secure civilian convoy route\nHold the central corridor\nDisrupt hostile reinforcement timing",objectiveStatus:"Partial Success",objectiveNote:"Convoy cleared the route before final withdrawal.",freeformInput:"",status:""};
+      state.sections.summary={...state.sections.summary,enabled:true,collapsed:false,freeformInput:"AEGIS elements intercepted hostile movement near the corridor and delayed enemy advance long enough for civilian traffic to clear the zone. Tactical control was maintained, though losses and frame strain reduced immediate follow-up capability.",status:""};
+      state.sections.casualties={...state.sections.casualties,enabled:true,collapsed:false,mode:"structured",structuredInput:"Willa - Armor scoring across left flank\nJoker - Reactor shielding compromised\nGrave Protocol - Sensor mast damage",freeformInput:"",status:""};
+      state.sections.observations={...state.sections.observations,enabled:true,collapsed:false,mode:"structured",enemyRows:[{shortName:"Harpy",enemyType:"Draconic",enemyClass:"Class Three",enemyArmor:"Tank",weapons:["Claw","Acid","Suppression"],note:"They screamed and died."},{shortName:"Warden",enemyType:"Quadruped",enemyClass:"Class Four",enemyArmor:"General",weapons:["Club","Mandibles"],note:"Held the center lane and absorbed concentrated fire."}],workedInput:"Coordinated staggered fallback - kept the corridor open for convoy movement\nFocused fire discipline - disrupted the first heavy push",didntWorkInput:"Sensor triage under signal saturation - delayed target identification\nOvercommitment on pursuit - exposed the right flank",freeformInput:"",status:""};
+      state.sections.recommendations={...state.sections.recommendations,enabled:true,collapsed:false,mode:"structured",structuredInput:"Improve sensor triage - prioritize contacts that overlap evacuation lanes\nMaintain fallback doctrine - preserve the staggered withdrawal model\nClarify pursuit thresholds - prevent recon frames from overextending",freeformInput:"",status:""};
+      state.sections.commendations={...state.sections.commendations,enabled:true,collapsed:false,mode:"structured",structuredInput:"Willa - Maintained command cohesion during the withdrawal\nJoker - Screened the retreat lane under concentrated pressure",freeformInput:"",status:""};
+      state.sections.considerations={...state.sections.considerations,enabled:true,collapsed:false,mode:"structured",structuredInput:"Debrief Follow-Up - Review convoy timing against hostile contact windows\nMaintenance Priority - Inspect shielding stress on all returning frames",freeformInput:"",status:""};
+      state.sections.final_assessment={...state.sections.final_assessment,enabled:true,collapsed:false,freeformInput:"Mission objectives were partially achieved. Civilian protection remained the decisive success condition, though enemy pressure and accumulated frame strain limited exploitation after disengagement.",status:""};
+    }
+
+    function setStatus(msg,tone="ok"){
+      refs.status.textContent=msg; refs.status.className="status "+tone;
+      clearTimeout(setStatus.timer);
+      if(msg){setStatus.timer=setTimeout(()=>{refs.status.textContent="";refs.status.className="status"},3000);}
+    }
+
+    function chars(){return state.dataset&&Array.isArray(state.dataset.characterdata)?state.dataset.characterdata:[]}
+    function lookupCharacter(input){
+      const needle=t(input).toLowerCase(); if(!needle) return {status:"unresolved",matches:[]};
+      const matches=chars().filter(r=>[r.character_name,r.callsign,r.mech_name].map(v=>t(v).toLowerCase()).includes(needle));
+      if(matches.length===1) return {status:"resolved",matches};
+      if(matches.length>1) return {status:"ambiguous",matches};
+      return {status:"unresolved",matches:[]};
+    }
+    function charUrl(c){return t(c.source_character_url)||("https://delphi.aresmush.com/scene/"+encodeURIComponent(t(c.character_name)))}
+    function charName(c){return state.header.display_name_mode==="First"?t(c.character_name):(t(c.full_name)||t(c.character_name))}
+    function normScene(v){const s=t(v).replace(/[^\d]/g,""); return s?String(Number(s)):""}
+    function normDate(v){
+      const s=t(v); if(!s) return "";
+      if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+      const m=s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/); if(!m) return s;
+      return `${m[3]}-${m[1].padStart(2,"0")}-${m[2].padStart(2,"0")}`;
+    }
+    function subjectLine(){return `[${t(state.header.scene_title)}](https://delphi.aresmush.com/scene/${normScene(state.header.scene_number)}) - ${normDate(state.header.date)}`}
+    function sendLine(){
+      const result=lookupCharacter(state.header.character_lookup);
+      if(result.status!=="resolved"){state.header.lookupStatus=result.status==="ambiguous"?"Character lookup is ambiguous.":"Character lookup is unresolved."; return "";}
+      const c=result.matches[0], rank=t(c.rank), name=charName(c), url=charUrl(c), callsign=t(c.callsign), dept=t(c.department), pos=t(c.position), mech=t(c.mech_name)||"UNDESIGNATED";
+      state.header.lookupStatus="Character lookup resolved.";
+      if(dept==="Aegis Company Pilots"){
+        if(state.header.sender_role_mode==="AI") return callsign?`${mech}, AI partner to ${rank} [${name}](${url}) (${callsign})`:`${mech}, AI partner to ${rank} [${name}](${url})`;
+        return callsign?`${rank} [${name}](${url}), (${callsign}), Partner to ${mech}`:`${rank} [${name}](${url}), Partner to ${mech}`;
+      }
+      return `${rank} [${name}](${url}), ${dept} - ${pos}`;
+    }
+
+    function combatantLine(c){
+      const rank=t(c.rank), name=charName(c), url=charUrl(c), callsign=t(c.callsign), dept=t(c.department), pos=t(c.position), mech=t(c.mech_name)||"UNDESIGNATED";
+      if(dept==="Aegis Company Pilots") return callsign?`${rank} [${name}](${url}), (${callsign}), Partner to ${mech}`:`${rank} [${name}](${url}), Partner to ${mech}`;
+      return `${rank} [${name}](${url}), ${dept} - ${pos}`;
+    }
+
+    function inline(text){
+      let out=n(text).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+      out=out.replace(/\[([^\]]+)\]\(([^)]+)\)/g,(_,label,url)=>`<a href="${url}" target="_blank" rel="noreferrer">${label}</a>`);
+      out=out.replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>");
+      out=out.replace(/_([^_]+)_/g,"<em>$1</em>");
+      out=out.replace(/~~([^~]+)~~/g,"<del>$1</del>");
+      out=out.replace(/`([^`]+)`/g,"<code>$1</code>");
+      out=out.replace(/&lt;u&gt;([\s\S]*?)&lt;\/u&gt;/gi,"<u>$1</u>");
+      out=out.replace(/&lt;sup&gt;([\s\S]*?)&lt;\/sup&gt;/gi,"<sup>$1</sup>");
+      out=out.replace(/&lt;sub&gt;([\s\S]*?)&lt;\/sub&gt;/gi,"<sub>$1</sub>");
+      return out;
+    }
+
+    function markdownToHtml(text){
+      let source=n(text);
+      const lines=source.split("\n"), out=[]; let para=[], listType="", items=[], quote=[];
+      const flushPara=()=>{
+        if(para.length){
+          const html=para.map(entry=>inline(entry.text)).join("<br>");
+          out.push(`<p>${html}</p>`);
+          para=[];
+        }
+      };
+      const flushList=()=>{if(items.length){out.push(`<${listType}>${items.map(i=>`<li>${inline(i)}</li>`).join("")}</${listType}>`); items=[]; listType="";}};
+      const flushQuote=()=>{if(quote.length){out.push(`<blockquote>${quote.map(line=>`<p>${inline(line)}</p>`).join("")}</blockquote>`); quote=[];}};
+      lines.forEach(raw=>{
+        const line=raw.trim(); if(!line){flushPara(); flushList(); flushQuote(); return;}
+        if(line==="***"){flushPara(); flushList(); flushQuote(); out.push("<hr>"); return;}
+        const h=line.match(/^(#{2,5})\s+(.*)$/); if(h){flushPara(); flushList(); flushQuote(); out.push(`<h${Math.min(h[1].length,5)}>${inline(h[2])}</h${Math.min(h[1].length,5)}>`); return;}
+        const ol=line.match(/^\d+\.\s+(.*)$/); if(ol){flushPara(); flushQuote(); if(listType&&listType!=="ol") flushList(); listType="ol"; items.push(ol[1]); return;}
+        const ul=line.match(/^-\s+(.*)$/); if(ul){flushPara(); flushQuote(); if(listType&&listType!=="ul") flushList(); listType="ul"; items.push(ul[1]); return;}
+        const bq=line.match(/^>\s?(.*)$/); if(bq){flushPara(); flushList(); quote.push(bq[1]); return;}
+        flushList(); flushQuote(); para.push({text:line});
+      });
+      flushPara(); flushList(); flushQuote(); return out.join("\n");
+    }
+
+    function renderPreview(text){
+refs.frame.srcdoc=`<!doctype html><html><head><meta charset="UTF-8"><style>@import url("https://delphi.aresmush.com/game/styles/ares.css");:root{--bs-body-bg:#0f1318;--bs-body-color:#ebebeb;--bs-border-color:#2C3847}body{font-family:Arial,Helvetica,sans-serif;padding:20px;line-height:1.55;background:var(--bs-body-bg);color:var(--bs-body-color)}hr{margin:1.2rem 0;border:none;border-top:1px solid var(--bs-border-color)}a{color:#e4b66b}strong,h2,h3,h4,h5{color:#f2f4f7}code{background:rgba(255,255,255,.08);padding:1px 4px;border-radius:5px}</style></head><body>${markdownToHtml(text)}</body></html>`;
+    }
+
+    function sectionWrap(def,body){
+      const isEnabled=def.id==="section_zero"?true:Boolean(state.sections[def.id]?.enabled);
+      if(!body && !isEnabled) return "";
+      const parts=[def.emitHeader,body,"***"];
+      return joinBlocks(parts);
+    }
+
+    function splitFirstDash(v){const i=v.indexOf(" - "); return i===-1?[t(v),""]:[t(v.slice(0,i)),t(v.slice(i+3))];}
+    function joinTight(lines){return lines.map(v=>n(v).trim()).filter(Boolean).join("\n");}
+    function freeformHelp(){return `<details class="helper"><summary>Markdown Guide and Ares Formatting</summary><div class="help-tabs"><button class="help-tab active" data-help-tab="basics">Basics</button><button class="help-tab" data-help-tab="structure">Structure</button><button class="help-tab" data-help-tab="ares">Ares</button><button class="help-tab" data-help-tab="more">More</button></div><div class="help-panel active" data-help-panel="basics"><div class="help-grid"><strong>Text</strong><div class="help-block"><div class="help-chip-row"><span class="help-chip"><code>**bold**</code></span><span class="help-chip"><code>_italics_</code></span><span class="help-chip"><code>~~strike~~</code></span></div><div class="help-chip-row"><span class="help-chip"><code>&lt;u&gt;underline&lt;/u&gt;</code></span><span class="help-chip"><code>\`code\`</code></span></div></div><strong>Type</strong><div class="help-chip-row"><span class="help-chip"><code>&lt;sup&gt;super&lt;/sup&gt;</code></span><span class="help-chip"><code>&lt;sub&gt;sub&lt;/sub&gt;</code></span></div><strong>Links</strong><div class="help-block"><div class="help-chip-row"><span class="help-chip"><code>[Title](url)</code></span><span class="help-chip"><code>[http://url Title]</code></span></div><div class="help-chip-row"><span class="help-chip"><code>[[[Wiki Page]]]</code></span></div></div></div></div><div class="help-panel" data-help-panel="structure"><div class="help-grid"><strong>Lists</strong><div class="help-chip-row"><span class="help-chip"><code>* bullet</code></span><span class="help-chip"><code>1. number</code></span><span class="help-chip"><code>&gt; quote</code></span></div><strong>Heads</strong><div class="help-chip-row"><span class="help-chip"><code>##### heading</code></span><span class="help-chip"><code>*** divider</code></span></div><strong>Layout</strong><div class="help-note">blank line = new paragraph</div><strong>Extras</strong><div class="help-chip-row"><span class="help-chip"><code>[[collapsible Button]]...[[/collapsible]]</code></span></div></div></div><div class="help-panel" data-help-panel="ares"><div class="help-grid"><strong>Ares</strong><div class="help-chip-row"><span class="help-chip"><code>//italics//</code></span><span class="help-chip"><code>%r linebreak</code></span><span class="help-chip"><code>%b space</code></span></div><strong>Colors</strong><div class="help-block"><div><code>%x</code> or <code>%c</code> = start color</div><div><code>%xn</code> or <code>%cn</code> = reset</div><div><code>%xh</code> = highlight</div></div><strong>Examples</strong><div class="help-block"><div class="help-chip-row"><span class="help-chip"><code>%xrRed%xn</code></span><span class="help-chip"><code>%xgGreen%xn</code></span><span class="help-chip"><code>%xbBlue%xn</code></span></div><div class="help-chip-row"><span class="help-chip"><code>%xh%xrBright red%xn</code></span><span class="help-chip"><code>%x33Aqua/FANSI%xn</code></span></div></div></div></div><div class="help-panel" data-help-panel="more"><div class="help-grid"><strong>Reference</strong><div class="help-links"><a href="https://aresmush.com/tutorials/code/formatting.html" target="_blank" rel="noreferrer">Ares formatting codes ↗</a><a href="https://commons.wikimedia.org/wiki/File:Xterm-256color.svg" target="_blank" rel="noreferrer">Xterm 256 color chart ↗</a></div></div></div></details>`;}
+
+    function buildSectionZero(){return joinBlocks([HEADLINES[state.header.report_headline]||HEADLINES.after_action_report,`**TO:** AEGIS COMPANY CTC COC\n**FROM:** ${sendLine()}\n**SUBJECT:** ${subjectLine()}`,"***"])}
+    function buildCombatants(){const s=state.sections.combatants; if(!s.enabled) return ""; if(s.mode==="freeform"){s.status=t(s.freeformInput)?"Freeform combatants block ready.":"Combatants section is on with no freeform content yet."; return collapse(s.freeformInput);} let unresolved=0, ambiguous=0; const lines=n(s.structuredInput).split("\n").map(t).filter(Boolean).map(token=>{const r=lookupCharacter(token); if(r.status==="resolved") return combatantLine(r.matches[0]); if(r.status==="ambiguous") ambiguous+=1; else unresolved+=1; return "";}).filter(Boolean); s.status=`<span class="status-ok">${lines.length} emitted</span>, <span class="status-warn">${ambiguous} ambiguous</span>, <span class="status-bad">${unresolved} unresolved</span>`; return lines.join("\n");}
+    function buildObjectives(){const s=state.sections.objectives; if(!s.enabled) return ""; if(s.mode==="freeform") return collapse(s.freeformInput); const items=n(s.objectiveLines).split("\n").map(titleFirst).filter(Boolean).map((line,i)=>`${i+1}. ${line}`); const blocks=[]; if(items.length) blocks.push(items.join("\n")); blocks.push(`Mission Objectives Status: ${s.objectiveStatus}`); if(t(s.objectiveNote)) blocks.push(collapse(s.objectiveNote)); return joinBlocks(blocks);}
+    function buildSummary(){const s=state.sections.summary; return s.enabled?collapse(s.freeformInput):"";}
+    function buildCasualties(){const s=state.sections.casualties; if(!s.enabled) return ""; if(s.mode==="freeform") return collapse(s.freeformInput); let unresolved=0, ambiguous=0; const lines=[]; n(s.structuredInput).split("\n").forEach(raw=>{const line=t(raw); if(!line) return; const [lookup,note]=splitFirstDash(line); if(!lookup) return; const r=lookupCharacter(lookup); if(r.status==="ambiguous"){ambiguous+=1; return;} if(r.status!=="resolved"){unresolved+=1; return;} const c=r.matches[0], rank=t(c.rank), name=charName(c), url=charUrl(c), mech=t(c.mech_name)||"UNDESIGNATED"; const prefix=`**${rank} [${name}](${url})** & _${mech}_`; lines.push(t(note)?`${prefix} - ${note}`:prefix);}); s.status=`<span class="status-ok">${lines.length} emitted</span>, <span class="status-warn">${ambiguous} ambiguous</span>, <span class="status-bad">${unresolved} unresolved</span>`; return lines.join("\n");}
+    function buildObservations(){const s=state.sections.observations; if(!s.enabled) return ""; if(s.mode==="freeform") return collapse(s.freeformInput); const enemies=(s.enemyRows||[]).map(row=>{const name=t(row.shortName); if(!name) return ""; const weapons=(row.weapons||[]).filter(Boolean).join(", "); const meta=[t(row.enemyClass),t(row.enemyType),t(row.enemyArmor),weapons].filter(Boolean).join(" - "); return joinTight([`##### ${name}`,meta?`**${meta}**`:"",collapse(row.note)]);}).filter(Boolean).join("\n\n"); const worked=n(s.workedInput).split("\n").map(raw=>{const [title,note]=splitFirstDash(raw); return title?joinTight([`##### ${title}`,note]):"";}).filter(Boolean).join("\n\n"); const didnt=n(s.didntWorkInput).split("\n").map(raw=>{const [title,note]=splitFirstDash(raw); return title?joinTight([`##### ${title}`,note]):"";}).filter(Boolean).join("\n\n"); return joinBlocks(["#### *Enemy Types Observed*",enemies,"#### *What Worked*",worked,"#### *What Didn't Work*",didnt]);}
+    function buildRecommendations(){const s=state.sections.recommendations; if(!s.enabled) return ""; if(s.mode==="freeform") return collapse(s.freeformInput); return n(s.structuredInput).split("\n").map(raw=>{const [title,note]=splitFirstDash(raw); return title?joinTight([`##### ${title}`,note]):"";}).filter(Boolean).join("\n\n");}
+    function buildCommendations(){const s=state.sections.commendations; if(!s.enabled) return ""; if(s.mode==="freeform") return collapse(s.freeformInput); return n(s.structuredInput).split("\n").map(raw=>{const [lookup,note]=splitFirstDash(raw); if(!lookup) return ""; const r=lookupCharacter(lookup); if(r.status!=="resolved") return ""; const c=r.matches[0], rank=t(c.rank), name=charName(c), url=charUrl(c), mech=t(c.mech_name)||"UNDESIGNATED"; return joinTight([`##### ${rank}%b[${name}](${url})%b&%b${mech}`,note]);}).filter(Boolean).join("\n\n");}
+    function buildConsiderations(){const s=state.sections.considerations; if(!s.enabled) return ""; if(s.mode==="freeform") return collapse(s.freeformInput); return n(s.structuredInput).split("\n").map(raw=>{const line=t(raw); if(!line) return ""; const [title,note]=splitFirstDash(line); return note?joinTight([`##### ${title}`,note]):`- ${title}`;}).filter(Boolean).join("\n\n");}
+    function buildFinalAssessment(){const s=state.sections.final_assessment; return s.enabled?collapse(s.freeformInput):"";}
+
+    function rebuildOutput(){
+      const map={combatants:buildCombatants,objectives:buildObjectives,summary:buildSummary,casualties:buildCasualties,observations:buildObservations,recommendations:buildRecommendations,commendations:buildCommendations,considerations:buildConsiderations,final_assessment:buildFinalAssessment};
+      const blocks=[buildSectionZero()];
+      state.sectionOrder.forEach(id=>{
+        const def=DEFS.find(d=>d.id===id), body=map[id]();
+        if(state.sections[id]?.enabled || body) blocks.push(sectionWrap(def,body));
+      });
+      state.output=joinBlocks(blocks)+"\n"; refs.output.textContent=state.output; renderPreview(state.output); refreshStatuses();
+    }
+
+    function refreshStatuses(){
+      const lookup=document.getElementById("lookupStatus"); if(lookup){lookup.textContent=state.header.lookupStatus||""; lookup.className="lookup-status "+(/ambiguous|unresolved/i.test(state.header.lookupStatus)?"warn":/^Character lookup resolved\.$/i.test(state.header.lookupStatus)?"ok":"");}
+      Object.entries(state.sections).forEach(([id,s])=>{const node=document.querySelector(`[data-section-status="${id}"]`); if(node) node.innerHTML=s.status||"";});
+    }
+
+    function mobileSync(){
+      document.getElementById("formPanel").classList.toggle("active",state.mobileTab==="form");
+      document.getElementById("outputPanel").classList.toggle("active",state.mobileTab!=="form");
+      document.querySelectorAll("[data-mobile-tab]").forEach(btn=>btn.classList.toggle("active",btn.dataset.mobileTab===state.mobileTab));
+      document.querySelectorAll("[data-tab]").forEach(btn=>btn.classList.toggle("active",btn.dataset.tab===state.desktopTab));
+      document.querySelectorAll(".tab-panel").forEach(panel=>panel.classList.toggle("active",panel.id===`${state.desktopTab}Tab`));
+    }
+
+    function renderHead(def,index){
+      if(def.id==="section_zero") return `<div class="section-head pinned"><button class="icon collapse-toggle ${state.header.collapsed?"collapsed":""}" data-collapse-header="section_zero">${state.header.collapsed?"▶":"▼"}</button><button class="icon disabled">◀</button><div class="section-index">00</div><button class="icon disabled">▶</button><div class="section-label">${def.label}</div><div class="toggle-group"><button class="pill-toggle active disabled">On</button></div><div class="toggle-group"><button class="pill-toggle mode-toggle structured disabled">Pinned</button></div></div>`;
+      const s=state.sections[def.id], symbol=s.collapsed?"▶":"▼";
+      const toggle=`<button class="pill-toggle ${s.enabled?"active":""}" data-toggle="${def.id}">${s.enabled?"On":"Off"}</button>`;
+      const mode=def.type==="mixed"?`<div class="toggle-group"><button class="pill-toggle mode-toggle ${s.mode}" data-mode-toggle="${def.id}">${s.mode==="structured"?"Structured":"Freeform"}</button></div>`:"";
+      return `<div class="section-head"><button class="icon collapse-toggle ${s.collapsed?"collapsed":""}" data-collapse="${def.id}">${symbol}</button><button class="icon" data-move="${def.id}:up">◀</button><div class="section-index">${index}</div><button class="icon" data-move="${def.id}:down">▶</button><div class="section-label">${def.label}</div><div class="toggle-group">${toggle}</div>${mode}</div>`;
+    }
+
+    function sectionZeroBody(){
+      return `<div class="section-body ${state.header.collapsed?"collapsed":""}">
+        <label>Report Headline</label><select id="reportHeadline"><option value="after_action_report"${state.header.report_headline==="after_action_report"?" selected":""}>after_action_report</option><option value="addendum"${state.header.report_headline==="addendum"?" selected":""}>addendum</option><option value="amendment"${state.header.report_headline==="amendment"?" selected":""}>amendment</option></select><span class="field-hint">After Action Report for a primary report, Addendum to expand another report, or Amendment to correct or conflict with one.</span>
+        <div class="row3"><div><label>Character Lookup</label><input id="characterLookup" value="${esc(state.header.character_lookup)}" placeholder="character name, callsign, or mech name"><span class="field-hint">Character name, callsign, or mech name.</span></div><div><label>First / Full</label><select id="displayMode"><option${state.header.display_name_mode==="First"?" selected":""}>First</option><option${state.header.display_name_mode==="Full"?" selected":""}>Full</option></select><span class="field-hint">Controls the sender display name.</span></div><div><label>Pilot / AI</label><select id="senderMode"><option${state.header.sender_role_mode==="Pilot"?" selected":""}>Pilot</option><option${state.header.sender_role_mode==="AI"?" selected":""}>AI</option></select><span class="field-hint">Changes the sender line format.</span></div></div>
+        <div class="row3"><div><label>Scene Title</label><input id="sceneTitle" value="${esc(state.header.scene_title)}" placeholder="scene title"><span class="field-hint">Used in the subject line link.</span></div><div><label>Scene Number</label><input id="sceneNumber" value="${esc(state.header.scene_number)}" inputmode="numeric" placeholder="4201"><span class="field-hint">Numbers only.</span></div><div><label>Date</label><input id="sceneDate" value="${esc(state.header.date)}" placeholder="YYYY-MM-DD"><span class="field-hint">Normalizes to YYYY-MM-DD.</span></div></div>
+        <div id="lookupStatus" class="lookup-status"></div></div>`;
+    }
+
+    function mixedBody(id){
+      const s=state.sections[id];
+      if(id==="combatants") return s.mode==="structured"?`<label>Structured Input</label><textarea data-bind="combatants.structuredInput" rows="5" placeholder="Willa&#10;Poet&#10;Arcadia Cerberus">${esc(s.structuredInput)}</textarea><span class="field-hint">One lookup per line: character name, callsign, or mech name.</span><div class="small">Each resolved line emits one combatant entry.</div>`:`${freeformHelp()}<label>Freeform Input</label><textarea data-bind="combatants.freeformInput" rows="5">${esc(s.freeformInput)}</textarea><span class="field-hint">Emits exactly what you type in the combatants block.</span>`;
+      if(id==="objectives") return s.mode==="structured"?`<label>Objective Lines</label><textarea data-bind="objectives.objectiveLines" rows="5" placeholder="Secure civilian convoy route&#10;Hold the central corridor&#10;Disrupt hostile reinforcement timing">${esc(s.objectiveLines)}</textarea><span class="field-hint">One objective per line. Each line becomes a numbered item.</span><label>Objective Status</label><select data-bind="objectives.objectiveStatus">${OBJECTIVE_STATUS_VALUES.map(v=>`<option${s.objectiveStatus===v?" selected":""}>${v}</option>`).join("")}</select><span class="field-hint">Accepted values: ${OBJECTIVE_STATUS_VALUES.join(", ")}.</span><label>Objective Note</label><textarea data-bind="objectives.objectiveNote" rows="3" placeholder="Convoy cleared the route before final withdrawal.">${esc(s.objectiveNote)}</textarea><span class="field-hint">Optional supporting note.</span>`:`${freeformHelp()}<label>Freeform Input</label><textarea data-bind="objectives.freeformInput" rows="7">${esc(s.freeformInput)}</textarea>`;
+      if(id==="casualties") return s.mode==="structured"?`<label>Structured Input</label><textarea data-bind="casualties.structuredInput" rows="7" placeholder="Willa - Armor scoring across left flank&#10;Joker - Reactor shielding compromised&#10;Grave Protocol - Sensor mast damage">${esc(s.structuredInput)}</textarea><span class="field-hint">One entry per line: combatant lookup - optional note. Accepted lookup values: character name, callsign, or mech name.</span>`:`${freeformHelp()}<label>Freeform Input</label><textarea data-bind="casualties.freeformInput" rows="7">${esc(s.freeformInput)}</textarea>`;
+      if(id==="observations") return s.mode==="structured"?`<label>Enemy Types Observed</label><span class="field-hint">Add one enemy per row. Blank rows do not emit.</span>${(s.enemyRows||[]).map((row,i)=>`<div class="enemy-row"><div class="enemy-grid"><div><label>Enemy Name</label><input data-enemy-bind="${i}.shortName" value="${esc(row.shortName)}" placeholder="Hellion"></div><div><label>Type</label><select data-enemy-bind="${i}.enemyType"><option value=""></option>${OBSERVATION_TYPES.map(v=>`<option value="${esc(v)}"${row.enemyType===v?" selected":""}>${v}</option>`).join("")}</select></div><div><label>Enemy Class</label><select data-enemy-bind="${i}.enemyClass"><option value=""></option>${OBSERVATION_CLASSES.map(v=>`<option value="${esc(v)}"${row.enemyClass===v?" selected":""}>${v}</option>`).join("")}</select></div><div><label>Enemy Armor</label><select data-enemy-bind="${i}.enemyArmor"><option value=""></option>${OBSERVATION_ARMOR.map(v=>`<option value="${esc(v)}"${row.enemyArmor===v?" selected":""}>${v}</option>`).join("")}</select></div></div><label>Enemy Weapons</label><div class="weapon-grid">${OBSERVATION_WEAPONS.map(v=>`<label class="weapon-option"><input type="checkbox" data-enemy-weapon="${i}.${esc(v)}"${(row.weapons||[]).includes(v)?" checked":""}> <span>${v}</span></label>`).join("")}</div><span class="field-hint">Multiple selections emit as comma-separated text.</span><label>Enemy Note</label><textarea data-enemy-bind="${i}.note" rows="3" placeholder="Observed behavior, weak points, or unusual systems.">${esc(row.note)}</textarea><span class="field-hint">Optional note informed by observed behavior or description.</span><div class="enemy-actions"><button type="button" class="icon" data-add-enemy="observations">Add</button><button type="button" class="icon" data-remove-enemy="${i}">Remove</button></div></div>`).join("")}<label>What Worked</label><textarea data-bind="observations.workedInput" rows="4">${esc(s.workedInput)}</textarea><span class="field-hint">One item per line: title - optional note.</span><label>What Didn't Work</label><textarea data-bind="observations.didntWorkInput" rows="4">${esc(s.didntWorkInput)}</textarea><span class="field-hint">One item per line: title - optional note.</span>`:`${freeformHelp()}<label>Freeform Input</label><textarea data-bind="observations.freeformInput" rows="10">${esc(s.freeformInput)}</textarea>`;
+      if(id==="recommendations") return s.mode==="structured"?`<label>Structured Input</label><textarea data-bind="recommendations.structuredInput" rows="6">${esc(s.structuredInput)}</textarea><span class="field-hint">One recommendation per line: recommendation - optional note.</span>`:`${freeformHelp()}<label>Freeform Input</label><textarea data-bind="recommendations.freeformInput" rows="6">${esc(s.freeformInput)}</textarea>`;
+      if(id==="commendations") return s.mode==="structured"?`<label>Structured Input</label><textarea data-bind="commendations.structuredInput" rows="6">${esc(s.structuredInput)}</textarea><span class="field-hint">One entry per line: combatant lookup - optional commendation note. Accepted lookup values: character name, callsign, or mech name.</span><div class="small">Uses %b spacing in the structured heading because Ares eats plain spaces there.</div>`:`${freeformHelp()}<label>Freeform Input</label><textarea data-bind="commendations.freeformInput" rows="6">${esc(s.freeformInput)}</textarea>`;
+      if(id==="considerations") return s.mode==="structured"?`<label>Structured Input</label><textarea data-bind="considerations.structuredInput" rows="6">${esc(s.structuredInput)}</textarea><span class="field-hint">One entry per line: consideration title - optional note.</span>`:`${freeformHelp()}<label>Freeform Input</label><textarea data-bind="considerations.freeformInput" rows="6">${esc(s.freeformInput)}</textarea>`;
+      return "";
+    }
+
+    function freeformBody(id){const s=state.sections[id]; return `${freeformHelp()}<label>Freeform Input</label><textarea data-bind="${id}.freeformInput" rows="8">${esc(s.freeformInput)}</textarea>`;}
+
+    function renderSections(){
+      refs.mount.innerHTML=[`<div class="section-card">${renderHead(DEFS[0],"00")}${sectionZeroBody()}</div>`,...state.sectionOrder.map((id,i)=>{const def=DEFS.find(d=>d.id===id), s=state.sections[id]; return `<div class="section-card">${renderHead(def,String(i+1).padStart(2,"0"))}<div class="section-body ${s.collapsed?"collapsed":""}">${def.type==="freeform-only"?freeformBody(id):mixedBody(id)}<div class="lookup-status" data-section-status="${id}"></div></div></div>`;})].join("");
+      bindSectionControls(); refreshStatuses(); mobileSync();
+    }
+
+    function bindSectionControls(){
+      const map=[["reportHeadline","report_headline"],["characterLookup","character_lookup"],["displayMode","display_name_mode"],["senderMode","sender_role_mode"],["sceneTitle","scene_title"],["sceneNumber","scene_number"],["sceneDate","date"]];
+      map.forEach(([id,key])=>{const node=document.getElementById(id); if(!node) return; node.oninput=node.onchange=(e)=>{state.header[key]=e.target.value; if(key==="report_headline"){applyHeadlineDefaults(); renderSections();} rebuildOutput();};});
+      document.querySelectorAll("[data-bind]").forEach(node=>{node.oninput=node.onchange=(e)=>{const [id,key]=e.target.dataset.bind.split("."); state.sections[id][key]=e.target.value; rebuildOutput();};});
+      document.querySelectorAll("[data-enemy-bind]").forEach(node=>{node.oninput=node.onchange=(e)=>{const [idx,key]=e.target.dataset.enemyBind.split("."); const row=state.sections.observations.enemyRows[Number(idx)]; if(!row) return; row[key]=e.target.value; rebuildOutput();};});
+      document.querySelectorAll("[data-enemy-weapon]").forEach(node=>{node.onchange=(e)=>{const [idx,weapon]=e.target.dataset.enemyWeapon.split("."); const row=state.sections.observations.enemyRows[Number(idx)]; if(!row) return; const set=new Set(row.weapons||[]); if(e.target.checked) set.add(weapon); else set.delete(weapon); row.weapons=[...set]; rebuildOutput();};});
+      document.querySelectorAll("[data-add-enemy]").forEach(btn=>btn.onclick=()=>{state.sections.observations.enemyRows.push(createObservationEnemyRow()); renderSections(); rebuildOutput();});
+      document.querySelectorAll("[data-remove-enemy]").forEach(btn=>btn.onclick=()=>{const idx=Number(btn.dataset.removeEnemy); state.sections.observations.enemyRows.splice(idx,1); if(!state.sections.observations.enemyRows.length) state.sections.observations.enemyRows.push(createObservationEnemyRow()); renderSections(); rebuildOutput();});
+      document.querySelectorAll("[data-toggle]").forEach(btn=>btn.onclick=()=>{const id=btn.dataset.toggle, s=state.sections[id]; s.enabled=!s.enabled; s.collapsed=!s.enabled?true:false; renderSections(); rebuildOutput();});
+      document.querySelectorAll("[data-mode-toggle]").forEach(btn=>btn.onclick=()=>{const id=btn.dataset.modeToggle; state.sections[id].mode=state.sections[id].mode==="structured"?"freeform":"structured"; renderSections(); rebuildOutput();});
+      document.querySelectorAll("[data-collapse]").forEach(btn=>btn.onclick=()=>{const id=btn.dataset.collapse; state.sections[id].collapsed=!state.sections[id].collapsed; renderSections();});
+      document.querySelectorAll("[data-collapse-header]").forEach(btn=>btn.onclick=()=>{state.header.collapsed=!state.header.collapsed; renderSections();});
+      document.querySelectorAll("[data-move]").forEach(btn=>btn.onclick=()=>{const [id,dir]=btn.dataset.move.split(":"); const i=state.sectionOrder.indexOf(id), j=dir==="up"?i-1:i+1; if(j<0||j>=state.sectionOrder.length) return; [state.sectionOrder[i],state.sectionOrder[j]]=[state.sectionOrder[j],state.sectionOrder[i]]; renderSections(); rebuildOutput();});
+      document.querySelectorAll(".helper").forEach(helper=>{
+        helper.querySelectorAll("[data-help-tab]").forEach(btn=>btn.onclick=()=>{
+          const key=btn.dataset.helpTab;
+          helper.querySelectorAll("[data-help-tab]").forEach(node=>node.classList.toggle("active",node===btn));
+          helper.querySelectorAll("[data-help-panel]").forEach(panel=>panel.classList.toggle("active",panel.dataset.helpPanel===key));
+        });
+      });
+    }
+
+    function bindTopControls(){
+      document.getElementById("resetBtn").onclick=(event)=>{event.preventDefault(); initDefaults(); renderSections(); rebuildOutput(); setStatus("Defaults restored.","ok");};
+      document.getElementById("sampleBtn").onclick=(event)=>{event.preventDefault(); initDefaults(); fillStructuredSample(); renderSections(); rebuildOutput(); setStatus("Structured sample loaded.","ok");};
+      document.getElementById("copyBtn").onclick=async(event)=>{event.preventDefault(); try{await navigator.clipboard.writeText(state.output); setStatus("Output copied.","ok");}catch{setStatus("Clipboard copy failed.","bad");}};
+      document.getElementById("downloadBtn").onclick=(event)=>{event.preventDefault(); const file=((`${t(state.header.scene_title)} - ${normDate(state.header.date)}`||"after_action_report").replace(/\[[^\]]+\]\([^)]+\)/g,"").replace(/[<>:"/\\|?*\[\]\(\)]/g,"").replace(/\s+/g," ").trim().replace(/ /g,"_")||"after_action_report")+".txt"; const blob=new Blob([state.output],{type:"text/plain;charset=utf-8"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=file; a.click(); URL.revokeObjectURL(a.href); setStatus(`Downloaded ${file}`,"ok");};
+      document.getElementById("allOnBtn").onclick=(event)=>{event.preventDefault(); Object.entries(state.sections).forEach(([id,s])=>{s.enabled=true; s.collapsed=false; if(id==="summary"||id==="final_assessment"){s.mode=undefined;} if(id==="commendations"||id==="considerations"){s.mode=s.mode||"structured";}}); renderSections(); rebuildOutput(); setStatus("Optional sections enabled.","ok");};
+      document.getElementById("allOffBtn").onclick=(event)=>{event.preventDefault(); Object.entries(state.sections).forEach(([,s])=>{s.enabled=false; s.collapsed=true;}); renderSections(); rebuildOutput(); setStatus("Optional sections disabled.","ok");};
+      document.getElementById("allStructuredBtn").onclick=(event)=>{event.preventDefault(); setAllMixedModes("structured"); renderSections(); rebuildOutput(); setStatus("Mixed sections set to structured.","ok");};
+      document.getElementById("allFreeformBtn").onclick=(event)=>{event.preventDefault(); setAllMixedModes("freeform"); renderSections(); rebuildOutput(); setStatus("Mixed sections set to freeform.","ok");};
+      document.getElementById("expandBtn").onclick=(event)=>{event.preventDefault(); Object.values(state.sections).forEach(s=>{if(s.enabled) s.collapsed=false;}); renderSections(); setStatus("Enabled sections expanded.","ok");};
+      document.getElementById("collapseBtn").onclick=(event)=>{event.preventDefault(); state.header.collapsed=true; Object.values(state.sections).forEach(s=>{s.collapsed=true;}); renderSections(); setStatus("All sections collapsed.","ok");};
+      document.querySelectorAll("[data-tab]").forEach(btn=>btn.onclick=()=>{state.desktopTab=btn.dataset.tab; mobileSync();});
+      document.querySelectorAll("[data-mobile-tab]").forEach(btn=>btn.onclick=()=>{state.mobileTab=btn.dataset.mobileTab; if(state.mobileTab==="output") state.desktopTab="output"; if(state.mobileTab==="preview") state.desktopTab="preview"; mobileSync();});
+    }
+
+    function displayIso(value){
+      const s=t(value);
+      if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+      const m=s.match(/^(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})$/);
+      if(!m) return s;
+      const months={Jan:"01",Feb:"02",Mar:"03",Apr:"04",May:"05",Jun:"06",Jul:"07",Aug:"08",Sep:"09",Oct:"10",Nov:"11",Dec:"12"};
+      return `${m[3]}-${months[m[2]]||"01"}-${m[1].padStart(2,"0")}`;
+    }
+
+    async function loadData(){
+      try{
+        const res=await fetch(DATASET_PATH); if(!res.ok) throw new Error(`HTTP ${res.status}`);
+        state.dataset=await res.json(); const m=state.dataset.metadata||{};
+        document.getElementById("metaWikiArchive").textContent=displayIso(m.wiki_archived_date_iso||m.wiki_archived_date_display)||"-";
+        document.getElementById("metaJsonBuild").textContent=displayIso(m.json_build_date_iso||m.json_build_date_display)||"-";
+        document.getElementById("metaCharacters").textContent=m.character_count||"-";
+        document.getElementById("metaMechs").textContent=m.mech_count||"-";
+        document.getElementById("metaColossi").textContent=m.colossi_count||"-";
+        datasetStatusNode().textContent="";
+        datasetStatusNode().className="meta-status";
+      }catch(error){
+        document.getElementById("metaWikiArchive").textContent="Load Failed";
+        document.getElementById("metaJsonBuild").textContent=error.message;
+        datasetStatusNode().textContent=`Dataset load failed: ${error.message}`;
+        datasetStatusNode().className="meta-status bad";
+      }
+    }
+
+    async function init(){initDefaults(); bindTopControls(); renderSections(); await loadData(); rebuildOutput();}
+    init();
+  </script>
+  </script>
+</body>
+</html>
